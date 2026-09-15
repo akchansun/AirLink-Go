@@ -1,0 +1,41 @@
+{
+  "RT_GROUP_ICON": {
+    "APP": {
+        "0000": [
+          "icon.png"
+        ]
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0000": {
+        "fixed": {
+          "file_version": "1.0.0.0",
+          "product_version": "1.0.0.0"
+        },
+        "info": {
+          "0409": {
+            "CompanyName": "喜相逢科技公司",
+            "FileDescription": "互传",
+            "FileVersion": "1.0.0",
+            "InternalName": "huchuan",
+            "LegalCopyright": "© 喜相逢科技公司",
+            "OriginalFilename": "互传.exe",
+            "ProductName": "互传",
+            "ProductVersion": "1.0.0"
+          },
+          "0804": {
+            "CompanyName": "喜相逢科技公司",
+            "FileDescription": "互传",
+            "FileVersion": "1.0.0",
+            "InternalName": "huchuan",
+            "LegalCopyright": "© 喜相逢科技公司",
+            "OriginalFilename": "互传.exe",
+            "ProductName": "互传",
+            "ProductVersion": "1.0.0"
+          }
+        }
+      }
+    }
+  }
+}

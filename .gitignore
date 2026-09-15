@@ -1,0 +1,16 @@
+.build/
+.swiftpm/
+.DS_Store
+*.xcuserstate
+DerivedData/
+Resources/AppIcon.iconset/
+*.exe
+*.dmg
+*.zip
+*.tar.gz
+*.app/
+win/huchuan.exe
+win/*.syso
+.idea/
+.vscode/
+*.log

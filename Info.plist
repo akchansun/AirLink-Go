@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>zh_CN</string>
+	<key>CFBundleDisplayName</key>
+	<string>互传</string>
+	<key>CFBundleExecutable</key>
+	<string>互传</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.huchuan.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>互传</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>互传需要访问局域网，才能发现附近设备并传输文件。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>互传要知道你正在用的 Wi-Fi 名称，才能生成给顾客扫的连网码。不会用来定位你在哪。</string>
+	<key>NSLocationUsageDescription</key>
+	<string>互传要知道你正在用的 Wi-Fi 名称，才能生成给顾客扫的连网码。不会用来定位你在哪。</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_huchuan._tcp</string>
+	</array>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>互传会把收到的文件保存到你选择的文件夹（默认在下载目录）。</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 喜相逢科技公司</string>
+	<key>CFBundleGetInfoString</key>
+	<string>互传 1.0.0，喜相逢科技公司</string>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>alert</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

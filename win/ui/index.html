@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>互传</title>
+<style>
+:root {
+  --paper:#f7f2eb; --sidebar:#ede5d9; --ink:#1f1a14; --muted:#6b6157;
+  --celadon:#387866; --soft:#d1e6de; --cinnabar:#bf522e; --card:#fffdf8;
+  --line:#d1c4b3; --chat:#f5efe6; --white:#fff;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; height:100%; background:var(--paper); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
+#app { display:flex; height:100%; }
+.sidebar { width:292px; min-width:240px; background:var(--sidebar); display:flex; flex-direction:column; border-right:1px solid var(--line); }
+.head { display:flex; align-items:flex-start; padding:14px 16px 8px; }
+.head h1 { font-size:22px; margin:0; letter-spacing:.28em; font-weight:600; }
+.head .brand { font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:.06em; }
+.head > button { margin-left:auto; border:0; background:transparent; color:var(--celadon); width:28px; height:28px; cursor:pointer; font-size:16px; }
+.status { color:var(--muted); font-size:12px; padding:0 16px 10px; }
+.status b { color:var(--ink); font-weight:500; font-size:13px; }
+.list { flex:1; overflow:auto; min-height:80px; }
+.peer { display:flex; gap:10px; align-items:center; padding:8px 10px; margin:0 8px; cursor:pointer; border-radius:12px; }
+.peer:hover { background:rgba(255,255,255,.35); }
+.peer.on { background:var(--soft); }
+.av { width:42px; height:42px; border-radius:50%; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; flex-shrink:0; position:relative; }
+.av .dot { position:absolute; right:-1px; bottom:-1px; width:10px; height:10px; border-radius:50%; border:2px solid var(--sidebar); background:#c4b8a8; }
+.av .dot.on { background:var(--celadon); }
+.peer.on .av .dot { border-color:var(--soft); }
+.top .av .dot { border-color:var(--card); }
+.peer.away { opacity:.78; }
+.live { font-size:11px; font-weight:500; }
+.live.on { color:var(--celadon); }
+.live.off { color:var(--muted); }
+.peer .name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:4px; }
+.peer .sub { font-size:12px; color:var(--muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.peer .meta { min-width:0; flex:1; }
+.foot { display:flex; flex-direction:column; gap:4px; padding:10px; border-top:1px solid var(--line); }
+.foot button { width:100%; min-height:0; border:0; background:transparent; padding:8px 12px; cursor:pointer; color:var(--ink); font-size:14px; font-weight:500; text-align:left; border-radius:10px; }
+.foot button:hover { color:var(--celadon); }
+.foot button.on { background:var(--soft); color:var(--celadon); }
+.star { margin-left:auto; border:0; background:transparent; cursor:pointer; color:#c4b8a8; font-size:14px; padding:4px; flex-shrink:0; }
+.star.on { color:var(--cinnabar); }
+.chk { width:18px; color:var(--celadon); flex-shrink:0; }
+.pickbar { padding:8px 12px 12px; }
+.bubble a { color:inherit; text-decoration:underline; }
+.empty { padding:20px 16px; text-align:center; color:var(--ink); font-size:14px; font-weight:500; }
+.empty span { display:block; margin-top:8px; color:var(--muted); font-size:12px; font-weight:400; line-height:1.5; }
+.main { flex:1; display:flex; flex-direction:column; background:var(--chat); min-width:0; }
+.welcome { margin:auto; text-align:center; color:var(--muted); padding:32px 24px; }
+.welcome h2 { color:var(--ink); letter-spacing:0; font-weight:600; font-size:18px; margin:0 0 10px; }
+.welcome p { max-width:360px; margin:0 auto; line-height:1.6; font-size:14px; }
+.welcome .brand { margin-top:14px; font-size:12px; }
+.brand-link {
+  border:0; background:transparent; padding:0; margin:0;
+  color:inherit; font:inherit; letter-spacing:inherit;
+  cursor:pointer; text-decoration:none;
+}
+.brand-link:hover { color:var(--celadon); text-decoration:underline; }
+.rings { width:120px; height:120px; margin:0 auto 14px; border-radius:50%; border:1px solid rgba(56,120,102,.18); position:relative; }
+.rings:before { content:""; position:absolute; inset:20px; border-radius:50%; border:1px solid rgba(56,120,102,.28); }
+.rings:after { content:""; position:absolute; left:50%; top:50%; width:16px; height:16px; margin:-8px 0 0 -8px; border-radius:50%; background:var(--celadon); }
+.top { padding:14px 18px; background:var(--card); border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+.top .who { font-weight:600; }
+.top .meta { font-size:12px; color:var(--muted); }
+.msgs { flex:1; overflow:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
+.row { display:flex; }
+.row.out { justify-content:flex-end; }
+.bubble { max-width:70%; padding:10px 14px; border-radius:16px; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+.bubble.in { background:#fff; border:1px solid var(--line); }
+.bubble.out { background:var(--celadon); color:#fff; }
+.file { max-width:420px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:12px 14px; min-width:220px; }
+.file .t { display:flex; gap:8px; align-items:center; font-weight:600; font-size:13px; }
+.file .st { font-size:11px; color:var(--muted); margin-left:auto; font-weight:500; }
+.bar { height:6px; background:#efe8de; border-radius:99px; overflow:hidden; margin:8px 0 6px; }
+.bar>i { display:block; height:100%; background:var(--celadon); width:0; }
+.file .d { font-size:12px; color:var(--muted); display:flex; justify-content:space-between; gap:8px; }
+.composer-wrap { padding:12px 16px 16px; background:var(--card); border-top:1px solid var(--line); }
+.composer-tools { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.chip { border:0; background:var(--paper); color:var(--ink); border-radius:999px; padding:8px 12px; cursor:pointer; font-size:13px; font-weight:500; }
+.chip:hover { color:var(--celadon); }
+.hint { font-size:12px; color:var(--muted); }
+.composer { display:flex; gap:10px; align-items:center; }
+.composer input[type=text] { flex:1; border:1px solid var(--line); border-radius:16px; padding:10px 14px; font-size:14px; outline:none; background:#fff; color:var(--ink); }
+.btn { border:0; border-radius:999px; padding:10px 16px; cursor:pointer; font-size:14px; }
+.btn.hot { background:var(--cinnabar); color:#fff; }
+.btn.ok { background:var(--celadon); color:#fff; }
+.btn.ok:disabled { background:var(--muted); }
+.btn.ghost { background:transparent; color:var(--celadon); }
+.pane { padding:28px 32px; overflow:auto; background:var(--paper); height:100%; }
+.pane h2 { margin:0 0 8px; font-size:26px; font-weight:600; letter-spacing:0; }
+.pane .lead { margin:0 0 22px; color:var(--muted); font-size:14px; line-height:1.6; }
+.steps { max-width:420px; width:100%; text-align:left; margin:0 auto 26px; display:flex; flex-direction:column; gap:16px; }
+.step { display:flex; gap:12px; align-items:flex-start; }
+.step i { flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:var(--soft); color:var(--celadon); font-style:normal; font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.step b { display:block; font-size:14px; font-weight:600; margin:0 0 4px; }
+.step span { display:block; font-size:13px; color:var(--muted); line-height:1.7; font-weight:400; }
+.urlbox.mid { text-align:center; max-width:420px; width:100%; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; }
+.cardbox { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:0 0 16px; max-width:640px; }
+.cardbox .lab { display:block; font-size:13px; color:var(--muted); font-weight:600; margin-bottom:10px; }
+.cardbox input[type=text], .cardbox input[type=number] { width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; background:var(--paper); color:var(--ink); }
+.helpsec { margin:0 0 16px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; max-width:720px; }
+.helpsec h3 { margin:0 0 10px; font-size:15px; color:var(--celadon); }
+.helpsec p { margin:0 0 10px; line-height:1.75; font-size:14px; }
+.helpsec p:last-child { margin:0; }
+.field { margin:0 0 16px; }
+.field label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+.field input[type=text], .field input[type=number] { width:100%; max-width:480px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; background:#fff; color:var(--ink); }
+.check { display:flex; align-items:center; gap:8px; margin:12px 0; }
+.mask { position:fixed; inset:0; background:rgba(26,20,14,.35); display:flex; align-items:center; justify-content:center; z-index:9; }
+.dialog { background:var(--card); border-radius:18px; padding:22px 24px; width:min(420px,92vw); box-shadow:0 16px 50px rgba(40,20,10,.18); }
+.dialog h3 { margin:0 0 8px; }
+.dialog p { color:var(--muted); font-size:14px; }
+.actions { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+.hidden { display:none !important; }
+.urlbox { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; word-break:break-all; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="file-pick" multiple hidden>
+<input type="file" id="folder-pick" webkitdirectory multiple hidden>
+<script>
+const hues = ['#387866','#bf522e','#665792','#2e668c','#946633','#427051'];
+function color(id){ let h=5381; for(const c of (id||'')) h=((h<<5)+h)+c.charCodeAt(0); return hues[Math.abs(h)%hues.length]; }
+function initial(n){ n=(n||'').trim(); return n? n[0] : '?'; }
+function size(n){
+  const u=['B','KB','MB','GB','TB']; let v=Number(n)||0, i=0;
+  while(v>=1024 && i<u.length-1){ v/=1024; i++; }
+  return i===0 ? Math.round(v)+' '+u[i] : v.toFixed(1)+' '+u[i];
+}
+let S = {page:'welcome', peers:[], items:[], messages:[], me:{}, settings:{}};
+async function api(path, body){
+  const opt = body===undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)};
+  await fetch(path, opt);
+}
+async function fillWifi(){
+  try{
+    const r = await fetch('/api/wifi-fill', {method:'POST'});
+    const j = await r.json();
+    const hint = document.getElementById('wifiHint');
+    if(j && j.ok && j.ssid){
+      const el = document.getElementById('ssid');
+      if(el) el.value = j.ssid;
+      if(hint) hint.textContent = '已填入「'+j.ssid+'」。密码还要自己填。';
+      return;
+    }
+    const msg = (j && j.error) ? j.error : '没读到当前 Wi-Fi 名称，请自己填。';
+    if(hint) hint.textContent = msg;
+    else alert(msg);
+  }catch(e){
+    const hint = document.getElementById('wifiHint');
+    const msg = '没读到当前 Wi-Fi 名称，请自己填。';
+    if(hint) hint.textContent = msg;
+    else alert(msg);
+  }
+}
+let pendingPage = null;
+function goPage(page){
+  pendingPage = page;
+  S.page = page;
+  render();
+  api('/api/page', {page});
+}
+document.getElementById('app').addEventListener('click', function(e){
+  const el = e.target.closest('[data-go]');
+  if(!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  goPage(el.getAttribute('data-go'));
+});
+function render(){
+  const app = document.getElementById('app');
+  const peers = S.peers||[];
+  const selected = (peers.find(p=>p.id===S.selectedId)) || null;
+  app.innerHTML = `
+    <div class="sidebar">
+      <div class="head"><div><h1>互传</h1><div class="brand">${siteLink('喜相逢科技公司')}</div></div><button title="刷新附近设备" onclick="api('/api/refresh')">↻</button></div>
+      <div class="status"><b>${esc((S.me&&S.me.name)||'互传')}</b><br>${esc((((S.me&&S.me.ips)||[]).join('  ')) || '还没有局域网地址')} · 端口 ${esc((S.me&&S.me.port)||41789)}<br>${esc(S.status||'正在寻找附近设备…')}</div>
+      <div style="display:flex;align-items:center;padding:0 16px 6px;font-size:12px;color:var(--muted)">
+        <span>附近的人</span>
+        <button type="button" style="margin-left:auto;border:0;background:transparent;color:var(--celadon);cursor:pointer;font-size:12px" onclick="api('/api/picking',{on:!S.pickingMany})">${S.pickingMany?'取消多选':'发给多台'}</button>
+      </div>
+      <div class="list">${peers.map(p=>peerRow(p, p.id===S.selectedId)).join('') || emptyList()}</div>
+      ${S.pickingMany ? `<div class="pickbar"><button class="btn ok" style="width:100%" ${!(S.multiIds||[]).length?'disabled':''} onclick="pickFiles()">${(S.multiIds||[]).length?('发文件给已勾选的 '+(S.multiIds||[]).length+' 台'):'先勾选要发的电脑'}</button></div>` : ''}
+      <div class="foot">
+        <button type="button" class="${S.page==='settings'?'on':''}" data-go="settings">设置</button>
+        <button type="button" class="${S.page==='phone'?'on':''}" data-go="phone">手机来传</button>
+        <button type="button" class="${S.page==='store'?'on':''}" data-go="store">门店码</button>
+        <button type="button" class="${S.page==='addIP'?'on':''}" data-go="addIP">添加 IP</button>
+        <button type="button" class="${S.page==='history'?'on':''}" data-go="history">收发记录</button>
+        <button type="button" class="${S.page==='help'?'on':''}" data-go="help">帮助</button>
+        <button type="button" onclick="api('/api/open-recv')">打开接收箱</button>
+      </div>
+    </div>
+    <div class="main">${detail()}</div>
+    ${overlay()}
+  `;
+}
+function emptyList(){
+  return `<div class="empty">还没发现设备<span>两台电脑连同一 Wi-Fi。请看上面的地址，用 192.168 开头的那个，不要填 VPN。也可以点「添加 IP」。</span></div>`;
+}
+function preview(p){
+  const msgs = S.messages||[];
+  for(let i=msgs.length-1;i>=0;i--){
+    const m = msgs[i];
+    if(m.peerId===p.id || m.peerName===p.name) return m.text;
+  }
+  const it = (S.items||[]).find(x=>x.peerName===p.name);
+  if(it) return it.title;
+  return p.host;
+}
+function peerRow(p, on){
+  const checked = (S.multiIds||[]).includes(p.id);
+  const chk = S.pickingMany ? `<span class="chk">${checked?'☑':'☐'}</span>` : '';
+  const star = p.id==='phone-web' ? '' : `<button class="star ${p.favorite?'on':''}" title="${p.favorite?'取消收藏':'收藏'}" onclick="event.stopPropagation();api('/api/favorite',{id:'${esc(p.id)}'})">${p.favorite?'★':'☆'}</button>`;
+  const live = !!p.online;
+  return `<div class="peer ${on||checked?'on':''} ${!live?'away':''}" onclick="clickPeer('${esc(p.id)}')">
+    ${chk}
+    <div class="av" style="background:${color(p.id)}">${esc(initial(p.name))}<i class="dot ${live?'on':''}"></i></div>
+    <div class="meta"><div class="name">${esc(p.name)}${p.favorite?' <span style="color:var(--cinnabar);font-size:10px">★</span>':''}</div><div class="sub"><span class="live ${live?'on':'off'}">${live?'在线':'离线'}</span> · ${esc(preview(p))}</div></div>
+    ${star}
+  </div>`;
+}
+function clickPeer(id){
+  if(S.pickingMany){
+    api('/api/multi-toggle',{id});
+    return;
+  }
+  api('/api/select',{id});
+}
+function detail(){
+  if(S.page==='settings') return settingsPane();
+  if(S.page==='phone') return phonePane();
+  if(S.page==='store') return storePane();
+  if(S.page==='addIP') return addIPPane();
+  if(S.page==='history') return historyPane();
+  if(S.page==='help') return helpPane();
+  const p = (S.peers||[]).find(x=>x.id===S.selectedId);
+  if(!p) return `<div class="welcome"><div class="rings"></div><h2>选左边一个人，就能发文件或说话</h2><p>和聊天软件一样：左边是附近设备，右边拖文件进去，或打字发送。手机扫码连通后，右边会自动出现聊天窗口。</p><p class="brand">${siteLink('喜相逢科技公司')}</p></div>`;
+  return chatPane(p);
+}
+function chatLinesHtml(p){
+  const msgs = (S.messages||[]).filter(m=>m.peerId===p.id);
+  const files = (S.items||[]).filter(it=>it.peerName===p.name || it.peerId===p.id);
+  const lines = [];
+  msgs.forEach(m=>lines.push({t:m.time, html: textBubble(m)}));
+  files.forEach(f=>lines.push({t: new Date(f.time).getTime(), html: fileBubble(f)}));
+  lines.sort((a,b)=>a.t-b.t);
+  return lines.map(x=>x.html).join('') || '<div class="status">发文件或打字即可</div>';
+}
+function chatPane(p){
+  const live = !!p.online;
+  const star = p.id==='phone-web' ? '' : `<button class="star ${p.favorite?'on':''}" style="margin-left:auto" onclick="api('/api/favorite',{id:'${esc(p.id)}'})">${p.favorite?'★':'☆'}</button>`;
+  return `<div class="top">
+      <div class="av" style="background:${color(p.id)};width:36px;height:36px">${esc(initial(p.name))}<i class="dot ${live?'on':''}"></i></div>
+      <div><div class="who">${esc(p.name)} <span class="live ${live?'on':'off'}">${live?'在线':'离线'}</span></div><div class="meta">${esc(p.host)} · ${esc(p.os||'')}${p.id!=='phone-web' && S.meetCode ? ' · 见面码 '+esc(S.meetCode)+'（两边应一样）' : ''}</div></div>
+      ${star}
+    </div>
+    <div class="msgs" id="msgs">${chatLinesHtml(p)}</div>
+    <div class="composer-wrap">
+      <div class="composer-tools">
+        <button class="chip" onclick="pickFiles()">发文件</button>
+        <button class="chip" onclick="pickFolder()">发文件夹</button>
+        ${p.id==='phone-web'?'':`<button class="chip" onclick="api('/api/send-clipboard')">发剪贴板</button>`}
+        <span class="hint">${p.id==='phone-web'?'发到手机网页，手机上点「保存到手机」':'也可以把文件或文件夹拖到上面的对话里'}</span>
+      </div>
+      <div class="composer">
+        <input id="draft" type="text" placeholder="和 ${esc(p.name)} 说点什么…" autocomplete="off" onkeydown="if(event.key==='Enter')sendText()">
+        <button class="btn ok" onclick="sendText()">发送</button>
+      </div>
+    </div>`;
+}
+function textBubble(m){
+  return `<div class="row ${m.outgoing?'out':''}"><div class="bubble ${m.outgoing?'out':'in'}">${linkify(m.text)}</div></div>`;
+}
+function linkify(s){
+  return esc(s).replace(/(https?:\/\/[^\s<&]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+function fileBubble(it){
+  const pct = it.total ? Math.round(it.done/it.total*100) : 0;
+  const side = it.direction==='send' ? 'out' : '';
+  let extra = '';
+  if(it.state==='传输中'||it.state==='等待中'||it.state==='等待对方上线'||it.state==='等手机来收'){
+    extra = `<div class="actions"><button class="btn ghost" onclick="api('/api/cancel',{id:'${esc(it.id)}'})">取消</button></div>`;
+  } else if(it.state==='已完成'){
+    if(it.localPath){
+      const p = encodeURIComponent(it.localPath);
+      extra = `<div class="actions">
+        <button class="btn ghost" onclick="openLocal('${p}')">打开</button>
+        <button class="btn ghost" onclick="revealLocal('${p}')">打开所在位置</button>
+      </div>`;
+    } else {
+      extra = `<div class="actions"><button class="btn ghost" onclick="api('/api/open-recv')">打开接收箱</button></div>`;
+    }
+  }
+  return `<div class="row ${side}"><div class="file">
+    <div class="t"><span>${it.direction==='send'?'↑':'↓'}</span><span>${esc(it.title)}</span><span class="st">${esc(it.state)}</span></div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="d"><span>${size(it.done)} / ${size(it.total)}</span><span>${esc(it.detail||'')}</span></div>
+    ${extra}
+  </div></div>`;
+}
+function settingsPane(){
+  const s=S.settings||{};
+  const mode=s.receiveMode|| (s.autoAccept?'auto':'ask');
+  const dm=s.discoverMode||'everyone';
+  const opt=(v,t)=>`<label class="check"><input type="radio" name="rm" value="${v}" ${mode===v?'checked':''}>${t}</label>`;
+  const dopt=(v,t)=>`<label class="check"><input type="radio" name="dm" value="${v}" ${dm===v?'checked':''}>${t}</label>`;
+  return `<div class="pane"><h2>设置</h2>
+    <div class="cardbox"><span class="lab">这台电脑叫什么</span><input id="dn" type="text" value="${esc(s.deviceName||'')}" placeholder="例如 客厅的电脑"></div>
+    <div class="cardbox"><span class="lab">收到的文件放哪里</span>
+      <input id="rf" type="text" value="${esc(s.receiveFolder||'')}">
+    </div>
+    <div class="cardbox"><span class="lab">接收方式</span>
+      ${opt('ask','每次都问我')}
+      ${opt('auto','自动收下')}
+      ${opt('fav','只自动收收藏的人')}
+      ${opt('off','全部拒收')}
+      <p style="color:var(--muted);font-size:12px;margin:6px 0 10px">收藏可点名单右侧的星星。选「只自动收收藏的人」时，其他人发来仍会先问你。</p>
+      <div class="field" style="margin:0"><label>口令（可空）</label><input id="pin" type="text" value="${esc(s.pin||'')}" placeholder="对方要填一样的口令"></div>
+    </div>
+    <div class="cardbox"><span class="lab">谁能发现我</span>
+      ${dopt('everyone','所有人都能发现我')}
+      ${dopt('favorites','只让收藏的人发现')}
+      ${dopt('off','不广播，别人找不到我')}
+      <p style="color:var(--muted);font-size:12px;margin:6px 0 0">「不广播」后，别人自动找不到你，仍可用添加 IP 互传。</p>
+    </div>
+    <div class="cardbox"><span class="lab">文字</span>
+      <div class="check" style="margin:0"><input id="copytext" type="checkbox" ${s.autoCopyText!==false?'checked':''}><label for="copytext">收到文字后自动复制到剪贴板</label></div>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">适合发验证码、网盘链接。聊天里也可点「发剪贴板」。</p>
+    </div>
+    <div class="cardbox"><span class="lab">门店码（打印店）</span>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 10px">柜台点「门店码」就会亮。填了下面的 Wi-Fi，亮码页会多一个连网码。连网码请用手机自带相机扫，不要用微信。</p>
+      <div class="field"><label>店里 Wi-Fi 名称</label><input id="ssid" type="text" value="${esc(s.storeWifiName||'')}"></div>
+      <div class="field"><label>店里 Wi-Fi 密码，没有密码就空着</label><input id="wifipw" type="password" value="${esc(s.storeWifiPassword||'')}"></div>
+      <p style="margin:0 0 10px"><button class="btn ok" type="button" onclick="fillWifi()">填入正在用的 Wi-Fi</button></p>
+      <p id="wifiHint" style="color:var(--muted);font-size:12px;margin:0 0 10px"></p>
+      <p style="color:var(--muted);font-size:12px;margin:0 0 10px">连网码只显示在店里电脑上，不会发到中转。</p>
+      <details>
+        <summary style="cursor:pointer;color:var(--ink);font-size:13px">高级（一般不用填）</summary>
+        <div class="field" style="margin-top:10px"><label>中转网址，可空</label><input id="relay" type="text" value="${esc(s.storeRelayURL||'')}"></div>
+        <div class="field" style="margin:0"><label>外网地址，可空</label><input id="puburl" type="text" value="${esc(s.storePublicURL||'')}"></div>
+        <p style="color:var(--muted);font-size:12px;margin:8px 0 0">中转只给顾客指路，文件直达店里电脑，不走服务器流量。店里电脑要一直亮着码。只有会弄电脑的人才填。</p>
+      </details>
+    </div>
+    <div class="cardbox"><span class="lab">开机与驻留</span>
+      <div class="check" style="margin:0"><input id="login" type="checkbox" ${s.launchAtLogin?'checked':''}><label for="login">开机后自动打开互传</label></div>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">${stayHint()}</p>
+    </div>
+    <div class="cardbox"><span class="lab">传输</span>
+      <div class="field"><label>端口</label><input id="port" type="number" value="${s.port||41789}" style="max-width:120px"></div>
+      <div class="field" style="margin:0"><label>大文件同时传输路数（1–16）</label><input id="mc" type="number" value="${s.maxConnections||8}" style="max-width:120px"></div>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 12px">改了名字或端口后点保存。Wi-Fi 一般 4～8 路就够快。电脑之间传文件已加密，每块用 SHA-256 核对。旧版互传连不上。</p>
+      ${((S.me&&S.me.os)==='Windows')?'<button class="btn ok" type="button" onclick="api(\'/api/firewall\')">允许防火墙</button>':''}
+    </div>
+    <button class="btn hot" onclick="saveSettings()">保存并开始寻找设备</button>
+    <p style="color:var(--muted);font-size:13px;margin-top:20px">互传 1.0.0 · ${siteLink('喜相逢科技公司')}</p>
+    <p style="color:var(--muted);font-size:12px;margin:6px 0 0">点公司名打开官网 www.ak129.cn</p>
+    <button class="btn ghost" onclick="api('/api/quit')">退出互传</button>
+  </div>`;
+}
+function historyPane(){
+  const items = S.history||[];
+  const rows = items.map(h => {
+    const when = h.time ? new Date(h.time*1000).toLocaleString() : '';
+    const kind = h.kind==='send' ? '发出' : '收到';
+    const open = h.path ? `<button class="btn ghost" onclick="openLocal('${encodeURIComponent(h.path)}')">打开</button>
+      <button class="btn ghost" onclick="revealLocal('${encodeURIComponent(h.path)}')">打开位置</button>` : '';
+    return `<div class="cardbox" style="max-width:720px;padding:14px 16px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="min-width:0;flex:1">
+          <div style="font-weight:600;font-size:14px"><span style="font-size:12px;color:var(--muted);margin-right:6px">${kind}</span>${esc(h.title||'')}</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:4px">${esc(h.peerName||'')} · ${esc(when)}</div>
+        </div>
+        <div class="actions" style="margin:0">${open}</div>
+      </div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted)">还没有收过或发过文件。记录最多保留 80 条。</p>';
+  return `<div class="pane">
+    <div style="display:flex;align-items:center;max-width:720px;margin-bottom:8px">
+      <h2 style="margin:0">收发记录</h2>
+      ${items.length?`<button class="btn ghost" style="margin-left:auto;color:var(--cinnabar)" onclick="api('/api/history-clear')">清空记录</button>`:''}
+    </div>
+    ${rows}
+  </div>`;
+}
+function helpPane(){
+  return `<div class="pane"><h2>用法说明</h2>
+    <p class="lead" style="max-width:720px;text-align:left">互传主要在同一局域网里用。电脑之间传文件已加密。打印店可用门店码：先让顾客连店里 Wi-Fi 再扫最稳。</p>
+    <div class="helpsec"><h3>电脑和电脑</h3>
+      <p>两边连同一个 Wi-Fi，都打开互传。左边点对方，把文件拖进去，或点「发文件」。也可以打字发消息。</p>
+      <p>第一次见面看聊天标题下的四位见面码，两边应一样，避免连错邻居电脑。</p>
+      <p>名单里找不到时，看窗口左边自己的地址，用 192.168 开头的那个，不要填 VPN。点「添加 IP」填对方的地址。</p>
+    </div>
+    <div class="helpsec"><h3>手机和电脑</h3>
+      <p>电脑点「手机来传」，手机扫码打开网页，页面一直开着。</p>
+      <p>手机发给电脑：在网页上选文件即可。电脑发给手机：电脑左边点「手机网页」，发文件或文字，手机上点「保存到手机」。</p>
+    </div>
+    <div class="helpsec"><h3>门店码</h3>
+      <p>打印店、图文店：柜台点「门店码」亮码。顾客用微信或相机扫，把文件投到店里电脑，不用加好友。</p>
+      <p>连网码请用手机自带相机扫，不要用微信。微信扫出会显示一串英文，连不上网。连上后再扫传文件码。也可在设置里填店里 Wi-Fi：亮码页会多一个连网码。</p>
+      <p>若用自己的中转：只给顾客指路，文件直达店里电脑，不走服务器流量。店里电脑要一直亮着码。码两小时作废，也可换码、结束。文件进接收箱。</p>
+    </div>
+    <div class="helpsec"><h3>手机和手机</h3>
+      <p>没有单独的手机 App。两部手机都连同一个 Wi-Fi，都扫同一台电脑的码，网页不要关。</p>
+      <p>一部手机选文件发出去，另一部手机下面会出现「另一部手机发来的文件」，点「保存到手机」。电脑接收箱里也会留一份。</p>
+      <p>必须有一台电脑开着互传当中转。关掉电脑或关掉网页，就传不成。</p>
+    </div>
+    <div class="helpsec"><h3>常用技巧</h3>
+      <p>${stayHint()}</p>
+      <p>右下角图标可直接「发给」在线设备。设置里可开机自启，也可选择每次都问、自动收下、只自动收收藏的人，或全部拒收。谁能发现我可选所有人、仅收藏、关闭。</p>
+      <p>发给离线的电脑，等对方上线会自动发出。传到一半断了或换了 Wi-Fi，会自动接着传，已传过的部分会跳过。每块文件用 SHA-256 核对，传坏了会重传这一块。</p>
+      <p>点「发给多台」可一次发给好几台。点「发剪贴板」可把验证码发到对面。</p>
+      <p>电脑互传全程加密，每块用 SHA-256 核对。两边都要是本版本，旧版会提示升级。</p>
+    </div>
+    <div class="helpsec"><h3>官网</h3>
+      <p>互传免费，不用注册。想看定时播音、彩店积分、英语教培等其他软件，请打开官网。</p>
+      <p>${siteLink('打开官网 www.ak129.cn')}</p>
+    </div>
+    <p style="color:var(--muted);font-size:13px">互传 1.0.0 · ${siteLink('喜相逢科技公司')}</p>
+  </div>`;
+}
+function phonePane(){
+  const qr = S.phoneQR ? `<p style="text-align:center;margin:0 0 14px"><img src="${S.phoneQR}" width="200" height="200" alt="手机来传二维码" style="background:#fff;padding:18px;border-radius:18px;border:1px solid var(--line)"></p>` : '';
+  return `<div class="pane" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:36px">
+    <h2>手机和电脑互相传</h2>
+    <p class="lead">扫码打开网页就能传，不用装 App</p>
+    <div class="steps">
+      <div class="step"><i>1</i><div><b>电脑和手机</b><span>手机连同一 Wi-Fi，扫下面的码打开网页，页面一直开着。</span></div></div>
+      <div class="step"><i>2</i><div><b>两部手机互传</b><span>都扫这台电脑的码。一部发出去，另一部点「保存到手机」。电脑上也会留一份。</span></div></div>
+    </div>
+    ${qr}
+    <div class="urlbox mid">${esc(S.phoneURL||'')}</div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn ok" onclick="copyPhone()">复制网址</button>
+    </div>
+    <p class="brand" style="margin-top:20px;color:var(--muted);font-size:12px">${siteLink('喜相逢科技公司')}</p>
+  </div>`;
+}
+function addIPPane(){
+  return `<div class="pane"><h2>用 IP 添加对方</h2>
+    <p style="color:var(--muted);max-width:520px">对方窗口左边能看到自己的 IP。路由器如果拦了自动发现，填这个最稳。</p>
+    <div class="field"><label>IP 地址</label><input id="mh" type="text" placeholder="例如 192.168.1.32"></div>
+    <div class="field"><label>端口，默认 41789</label><input id="mp" type="number" value="41789"></div>
+    <button class="btn ok" onclick="addIP()">添加到左侧名单</button>
+  </div>`;
+}
+function storePane(){
+  const b = S.booth;
+  const err = S.boothError ? `<p style="color:var(--cinnabar)">${esc(S.boothError)}</p>` : '';
+  const hintColor = (S.boothHint||'').indexOf('可以用手机流量')>=0 ? 'var(--celadon)' : 'var(--ink)';
+  const hint = S.boothHint ? `<p style="color:${hintColor};max-width:420px">${esc(S.boothHint)}</p>` : '';
+  if(!b){
+    return `<div class="pane" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:36px">
+      <h2>门店码</h2>
+      <p class="lead">柜台亮码，顾客扫了把文件投到这台电脑。连网码请用手机自带相机扫，不要用微信。连上后再用微信扫传文件码。</p>
+      ${hint}${err}
+      <p><button class="btn ok" type="button" onclick="fillWifi()">填入正在用的 Wi-Fi</button></p>
+      <p id="wifiHint" style="color:var(--muted);font-size:12px;margin:8px 0 0"></p>
+      <button class="btn hot" onclick="api('/api/booth-open')">亮码开始收文件</button>
+      <p class="brand" style="margin-top:20px;color:var(--muted);font-size:12px">${siteLink('喜相逢科技公司')}</p>
+    </div>`;
+  }
+  const ssidName = (S.settings && S.settings.storeWifiName) ? esc(S.settings.storeWifiName) : '';
+  const wifiQR = S.wifiQR ? `<div style="text-align:center;max-width:240px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">1. 连网码</div><img src="${S.wifiQR}" width="180" height="180" alt="连网码" style="background:#fff;padding:16px;border-radius:18px;border:1px solid var(--line)"><div style="color:var(--muted);font-size:12px;margin-top:8px">店里网：${ssidName}</div><div style="color:var(--cinnabar);font-size:12px;font-weight:600;margin-top:8px">请用手机自带「相机」扫，不要用微信。微信会显示一串英文，连不上网。</div></div>` : '';
+  const fileTitle = S.wifiQR ? '2. 传文件码' : '门店码';
+  const fileCap = S.wifiQR ? '连上店里网后，可用微信扫' : '扫了把文件发到这台电脑';
+  const qr = S.boothQR ? `<div style="text-align:center"><div style="font-size:13px;font-weight:600;margin-bottom:8px">${fileTitle}</div><img src="${S.boothQR}" width="180" height="180" alt="门店码" style="background:#fff;padding:16px;border-radius:18px;border:1px solid var(--line)"><div style="color:var(--muted);font-size:12px;margin-top:8px">${fileCap}</div></div>` : '';
+  const wifiTip = S.wifiQR ? '' : `<div style="margin:0 0 14px"><p style="color:var(--muted);font-size:12px">想让顾客扫一下就连上网，先填店里 Wi-Fi 名称。</p><p><button class="btn ok" type="button" onclick="fillWifi()">填入正在用的 Wi-Fi</button></p><p id="wifiHint" style="color:var(--muted);font-size:12px;margin:8px 0 0"></p></div>`;
+  const files = (b.files||[]).slice(-8).reverse().map(f=>`<div>${esc(f.name||'')}</div>`).join('');
+  return `<div class="pane" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:36px">
+    <h2>门店码</h2>
+    <p class="lead">柜台亮码，顾客扫了把文件投到这台电脑。</p>
+    ${hint}${err}
+    <div style="display:flex;gap:28px;flex-wrap:wrap;justify-content:center;margin:0 0 14px">${wifiQR}${qr}</div>
+    ${wifiTip}
+    <div class="urlbox mid">${esc(b.url||'')}</div>
+    <p style="color:var(--muted);font-size:13px">口令 ${esc(b.pin||'')} · 两小时后作废</p>
+    <div class="actions" style="justify-content:center">
+      <button class="btn ok" onclick="api('/api/booth-rotate')">换一个码</button>
+      <button class="btn ghost" onclick="api('/api/booth-close')">结束本次</button>
+    </div>
+    ${files?`<div style="margin-top:18px;text-align:left;max-width:420px"><b>这次收到的文件</b>${files}</div>`:''}
+  </div>`;
+}
+function overlay(){
+  if(S.incoming){
+    const f = S.incoming;
+    const files = (f.files||[]);
+    const rows = files.map(x=>`<div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span>${esc(x.relativePath||'')}</span><span style="color:var(--muted)">${size(x.size)}</span></div>`).join('');
+    return `<div class="mask"><div class="dialog">
+      <h3>${esc(f.peerName)} 要发给你</h3>
+      <p>共 ${files.length} 个文件，${size(f.total)}</p>
+      <div style="max-height:180px;overflow:auto;text-align:left;margin:8px 0 16px">${rows}</div>
+      <div class="actions">
+        <button class="btn ghost" onclick="api('/api/reject')">拒绝</button>
+        <button class="btn ok" onclick="api('/api/accept')">接收</button>
+      </div>
+    </div></div>`;
+  }
+  return '';
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+async function sendText(){
+  const el=document.getElementById('draft'); if(!el) return;
+  const t=el.value.trim(); if(!t) return;
+  el.value='';
+  await api('/api/send-text',{text:t});
+}
+async function saveSettings(){
+  const rm = (document.querySelector('input[name=rm]:checked')||{}).value || 'ask';
+  const dm = (document.querySelector('input[name=dm]:checked')||{}).value || 'everyone';
+  await api('/api/settings',{
+    deviceName: document.getElementById('dn').value,
+    receiveFolder: document.getElementById('rf').value,
+    receiveMode: rm,
+    autoAccept: rm==='auto',
+    launchAtLogin: document.getElementById('login').checked,
+    pin: document.getElementById('pin').value,
+    port: Number(document.getElementById('port').value||41789),
+    maxConnections: Number(document.getElementById('mc').value||8),
+    discoverMode: dm,
+    autoCopyText: document.getElementById('copytext').checked,
+    storeRelayURL: (document.getElementById('relay')||{}).value || '',
+    storePublicURL: (document.getElementById('puburl')||{}).value || '',
+    storeWifiName: (document.getElementById('ssid')||{}).value || '',
+    storeWifiPassword: (document.getElementById('wifipw')||{}).value || ''
+  });
+  api('/api/page',{page:'welcome'});
+}
+async function addIP(){
+  await api('/api/manual',{host:document.getElementById('mh').value, port:Number(document.getElementById('mp').value||41789)});
+}
+function copyPhone(){ navigator.clipboard.writeText(S.phoneURL||''); }
+async function postFiles(list){
+  if(!list || !list.length) return;
+  const fd = new FormData();
+  [...list].forEach(f => fd.append('files', f, f.webkitRelativePath || f.name));
+  (S.pickingMany ? (S.multiIds||[]) : []).forEach(id => fd.append('ids', id));
+  await fetch('/api/send-files', {method:'POST', body:fd});
+}
+function siteLink(text){
+  return `<button type="button" class="brand-link" title="打开官网 www.ak129.cn" onclick="api('/api/open-site')">${text}</button>`;
+}
+function stayHint(){
+  const os = (S.me && S.me.os) || '';
+  if(os === 'Linux'){
+    return '关掉窗口后，互传仍在后台。再点开始菜单里的「互传」，或再运行一次即可打开窗口。要彻底退出请点下面的「退出互传」。';
+  }
+  if(os === 'macOS'){
+    return '关掉窗口后，互传会留在屏幕右上角菜单栏。点图标可再打开。要退出请点下面的「退出互传」。';
+  }
+  return '关掉窗口后，互传会留在右下角。点图标可再打开。要退出请右击图标选「退出互传」。';
+}
+async function pickNative(path){
+  try{
+    const r = await fetch(path, {method:'POST'});
+    const j = await r.json();
+    return !!(j && j.native);
+  }catch(e){
+    return false;
+  }
+}
+async function pickFiles(){
+  if(typeof pickLocalFiles === 'function'){
+    await pickLocalFiles();
+    return;
+  }
+  if(await pickNative('/api/pick-files')) return;
+  const el = document.getElementById('file-pick');
+  if(el){ el.value=''; el.click(); }
+}
+async function pickFolder(){
+  if(typeof pickLocalFolder === 'function'){
+    await pickLocalFolder();
+    return;
+  }
+  if(await pickNative('/api/pick-folder')) return;
+  const el = document.getElementById('folder-pick');
+  if(el){ el.value=''; el.click(); }
+}
+function openLocal(enc){
+  api('/api/open-path',{path:decodeURIComponent(enc)});
+}
+function revealLocal(enc){
+  api('/api/reveal-path',{path:decodeURIComponent(enc)});
+}
+function wireFileDrop(){
+  const stop = e => { e.preventDefault(); e.stopPropagation(); };
+  document.addEventListener('dragover', stop, true);
+  document.addEventListener('dragenter', stop, true);
+  document.addEventListener('drop', async e => {
+    stop(e);
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+      await postFiles(e.dataTransfer.files);
+    }
+  }, true);
+  document.addEventListener('paste', async e => {
+    const files = e.clipboardData && e.clipboardData.files;
+    if(files && files.length){
+      e.preventDefault();
+      await postFiles(files);
+      return;
+    }
+    if(isTyping()) return;
+    const text = (e.clipboardData && e.clipboardData.getData('text/plain') || '').trim();
+    if(text && S.selectedId){
+      e.preventDefault();
+      await api('/api/send-text',{text});
+    }
+  }, true);
+}
+wireFileDrop();
+(function(){
+  const files = document.getElementById('file-pick');
+  const folder = document.getElementById('folder-pick');
+  if(files) files.addEventListener('change', async e => {
+    await postFiles(e.target.files);
+    e.target.value = '';
+  });
+  if(folder) folder.addEventListener('change', async e => {
+    await postFiles(e.target.files);
+    e.target.value = '';
+  });
+})();
+function isTyping(){
+  const ae = document.activeElement;
+  if(!ae) return false;
+  if(ae.id==='draft') return true;
+  if(ae.tagName==='INPUT' || ae.tagName==='TEXTAREA') return ae.type !== 'checkbox' && ae.type !== 'button';
+  return false;
+}
+function refreshChatMsgs(){
+  const box = document.getElementById('msgs');
+  const p = (S.peers||[]).find(x=>x.id===S.selectedId);
+  if(!box || !p) return;
+  const html = chatLinesHtml(p);
+  if(box.innerHTML === html) return;
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  box.innerHTML = html;
+  if(atBottom) box.scrollTop = box.scrollHeight;
+}
+let ticking = false;
+async function tick(){
+  if(ticking) return;
+  ticking = true;
+  try{
+    const r = await fetch('/api/state');
+    const next = await r.json();
+    const incoming = !!next.incoming;
+    if(next.page==='chat' && (pendingPage==='phone' || pendingPage==='welcome')){
+      pendingPage = null;
+    }
+    const page = pendingPage || next.page || 'welcome';
+    const typing = isTyping();
+    const stayPane = page==='settings' || page==='addIP' || page==='phone' || page==='welcome' || page==='help';
+    const sameView = S.page===page && S.selectedId===next.selectedId;
+    const samePeers = (next.peers||[]).map(p=>p.id+':'+(p.favorite?1:0)+':'+(p.host||'')+':'+(p.online?1:0)).join(',') === (S.peers||[]).map(p=>p.id+':'+(p.favorite?1:0)+':'+(p.host||'')+':'+(p.online?1:0)).join(',');
+    const samePick = !!next.pickingMany === !!S.pickingMany && JSON.stringify(next.multiIds||[])===JSON.stringify(S.multiIds||[]);
+    const needQR = page==='phone' && next.phoneQR && next.phoneQR !== (S.phoneQR||'');
+    if(pendingPage){
+      if(next.page === pendingPage) pendingPage = null;
+      next.page = page;
+    }
+    if(!incoming && sameView && samePeers && samePick && !needQR && (typing || stayPane || page==='chat')){
+      S = next;
+      S.page = page;
+      refreshChatMsgs();
+      return;
+    }
+    S = next;
+    S.page = page;
+    const keep = (document.getElementById('draft')||{}).value || '';
+    const scroll = document.getElementById('msgs');
+    const atBottom = !scroll || (scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight < 80);
+    render();
+    const d2 = document.getElementById('draft');
+    if(d2 && keep) d2.value = keep;
+    if(d2 && typing){
+      d2.focus();
+      try{ const n = d2.value.length; d2.setSelectionRange(n, n); }catch(e){}
+    }
+    const s2 = document.getElementById('msgs');
+    if(s2 && atBottom) s2.scrollTop = s2.scrollHeight;
+  }catch(e){}
+  finally{ ticking = false; }
+}
+setInterval(tick, 400);
+tick();
+</script>
+</body>
+</html>

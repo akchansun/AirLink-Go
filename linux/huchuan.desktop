@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=互传
+Comment=局域网文件互传，同一网络里传文件和文字
+Exec=huchuan
+Icon=huchuan
+Terminal=false
+Categories=Network;FileTransfer;Utility;
+StartupNotify=true
+StartupWMClass=Huchuan
