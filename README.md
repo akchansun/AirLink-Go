@@ -28,6 +28,14 @@
 | Windows | Go + WebView2（`win/`） | `scripts/build-win.sh` |
 | Linux | Go（amd64 / arm64） | `scripts/build-linux.sh`，见 `linux/用法.txt` |
 
+### 下载
+- 官网：<https://www.ak129.cn/huchuan/>
+- Gitee Release：<https://gitee.com/akcg/AirLink-Go/releases/tag/v1.0.0>
+  - macOS：`AirLinkGo-1.0.0-macos.zip`
+  - Windows：`AirLinkGo-1.0.0-windows-amd64.exe`
+  - Linux amd64 / arm64：见 Release 附件
+- 源码：<https://gitee.com/akcg/AirLink-Go>
+
 ### 编译（macOS）
 
 ```bash
@@ -74,6 +82,11 @@ MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖�
 - PC ↔ PC discovery and encrypted transfer on the same network
 - Phone browser via QR code (no app install)
 - Optional “store booth” QR for sending files to a shop PC
+
+### Download
+- Website: <https://www.ak129.cn/huchuan/>
+- Gitee Release: <https://gitee.com/akcg/AirLink-Go/releases/tag/v1.0.0>
+- Source: <https://gitee.com/akcg/AirLink-Go>
 
 ### Platforms
 - **macOS 14+**: Swift package (`Package.swift`), build with `zsh scripts/build.sh`
