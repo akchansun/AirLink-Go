@@ -14,3 +14,4 @@ win/*.syso
 .idea/
 .vscode/
 *.log
+scripts/upload.sh

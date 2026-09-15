@@ -59,16 +59,6 @@ zsh scripts/build-win.sh
 zsh scripts/build-linux.sh
 ```
 
-### 发布到官网（可选）
-
-`scripts/upload.sh` 会把介绍页与安装包同步到 `www.ak129.cn`。需要本机已配置 SSH 主机 `ak129-vps`，并通过环境变量指定静态站点目录：
-
-```bash
-export SITE_ROOT="/path/to/static-home"   # 含 index.html、huchuan/ 等
-export CMS_HOST="ak129-vps"
-zsh scripts/upload.sh
-```
-
 ### 许可证
 MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖（见其 LICENSE）。
 
