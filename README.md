@@ -6,7 +6,7 @@
 
 **产品名：** 互传  
 **英文名：** AirLink Go  
-**仓库名：** [AirLink-Go](https://gitee.com/akcg/AirLink-Go)  
+**仓库：** [GitHub](https://github.com/akchansun/AirLink-Go) · [Gitee](https://gitee.com/akcg/AirLink-Go)  
 **官网：** <https://www.ak129.cn/huchuan/>  
 **开发者：** [喜相逢科技](https://www.ak129.cn/)
 
@@ -30,11 +30,11 @@
 
 ### 下载
 - 官网：<https://www.ak129.cn/huchuan/>
+- GitHub Release（域外推荐）：<https://github.com/akchansun/AirLink-Go/releases/tag/v1.0.0>
 - Gitee Release：<https://gitee.com/akcg/AirLink-Go/releases/tag/v1.0.0>
   - macOS：`AirLinkGo-1.0.0-macos.zip`
   - Windows：`AirLinkGo-1.0.0-windows-amd64.exe`
   - Linux amd64 / arm64：见 Release 附件
-- 源码：<https://gitee.com/akcg/AirLink-Go>
 
 ### 编译（macOS）
 
@@ -85,8 +85,8 @@ MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖�
 
 ### Download
 - Website: <https://www.ak129.cn/huchuan/>
+- GitHub Release: <https://github.com/akchansun/AirLink-Go/releases/tag/v1.0.0>
 - Gitee Release: <https://gitee.com/akcg/AirLink-Go/releases/tag/v1.0.0>
-- Source: <https://gitee.com/akcg/AirLink-Go>
 
 ### Platforms
 - **macOS 14+**: Swift package (`Package.swift`), build with `zsh scripts/build.sh`
