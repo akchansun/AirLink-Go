@@ -1,10 +1,11 @@
-# 互传 / AirLink-Go
+# 互传 / AirLink Go
 
 [中文](#中文) · [English](#english)
 
 局域网文件互传：电脑 ↔ 电脑加密传输，手机扫码收发，无需注册、文件不走公网。
 
 **产品名：** 互传  
+**英文名：** AirLink Go  
 **仓库名：** [AirLink-Go](https://gitee.com/akcg/AirLink-Go)  
 **官网：** <https://www.ak129.cn/huchuan/>  
 **开发者：** [喜相逢科技](https://www.ak129.cn/)
@@ -68,7 +69,7 @@ MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖�
 ## English
 
 ### What it is
-**互传 (HuChuan)** — also tracked in this repo as **AirLink-Go** — is a free, open-source LAN file transfer tool:
+**互传 (HuChuan)** — English product name **AirLink Go** (repo: AirLink-Go) — is a free, open-source LAN file transfer tool:
 
 - PC ↔ PC discovery and encrypted transfer on the same network
 - Phone browser via QR code (no app install)
