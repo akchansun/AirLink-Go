@@ -20,13 +20,14 @@
 - **电脑 ↔ 电脑**：发现附近设备，加密传输
 - **手机扫码**：不用装 App，打开网页即可收发
 - **门店码**：顾客把文件发到店里电脑（打印 / 拷贝场景）
+- **国产 Linux**：统信 UOS、银河麒麟等可选 Linux 安装包（amd64 / 飞腾鲲鹏 arm64）
 
 ### 平台
 | 平台 | 技术 | 说明 |
 |------|------|------|
 | macOS 14+ | Swift / SwiftUI（`Package.swift`） | `scripts/build.sh` → `.build/互传.app` |
 | Windows | Go + WebView2（`win/`） | `scripts/build-win.sh` |
-| Linux | Go（amd64 / arm64） | `scripts/build-linux.sh`，见 `linux/用法.txt` |
+| Linux（含国产系统） | Go（amd64 / arm64） | 统信 UOS、银河麒麟、Ubuntu 等；`scripts/build-linux.sh`，详见 `linux/用法.txt` |
 
 ### 下载
 - 官网：<https://www.ak129.cn/huchuan/>
@@ -34,7 +35,7 @@
 - Gitee Release：<https://gitee.com/akcg/AirLink-Go/releases/tag/v1.0.0>
   - macOS：`AirLinkGo-1.0.0-macos.zip`
   - Windows：`AirLinkGo-1.0.0-windows-amd64.exe`
-  - Linux amd64 / arm64：见 Release 附件
+  - Linux（统信 UOS / 银河麒麟 / Ubuntu 等）：amd64 与 arm64（飞腾、鲲鹏）见 Release 附件；用法见 `linux/用法.txt`
 
 ### 编译（macOS）
 
@@ -55,9 +56,13 @@ zsh scripts/build-win.sh
 
 ### 编译（Linux）
 
+适用于统信 UOS、银河麒麟、Ubuntu 等发行版（x86_64 与 aarch64）。
+
 ```bash
 zsh scripts/build-linux.sh
 ```
+
+产物：`.build/linux/互传-*-linux-amd64.tar.gz`（普通 PC / 多数统信）与 `*-linux-arm64.tar.gz`（鲲鹏、飞腾等）。安装与运行说明见 [`linux/用法.txt`](linux/用法.txt)。
 
 ### 许可证
 MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖（见其 LICENSE）。
@@ -81,7 +86,7 @@ MIT，见 [LICENSE](LICENSE)。`win/third_party/go-qrcode` 为上游 MIT 依赖�
 ### Platforms
 - **macOS 14+**: Swift package (`Package.swift`), build with `zsh scripts/build.sh`
 - **Windows**: Go + WebView2 under `win/`
-- **Linux**: Go amd64/arm64 via `scripts/build-linux.sh`
+- **Linux** (including Chinese distros such as UnionTech UOS and Kylin): Go amd64/arm64 via `scripts/build-linux.sh`; see `linux/用法.txt`
 
 ### License
 MIT — see [LICENSE](LICENSE).
